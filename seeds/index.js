@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const cities = require('./cities');
 const { places, descriptors } = require('./seedHelper');
 const _db = 'yelp-camp'; //insertDBname
+const db = mongoose.connection;
 const Campground = require('../models/campground');
 
 //db
@@ -11,7 +12,6 @@ mongoose.connect(`mongodb://localhost:27017/${_db}`, {
 	useUnifiedTopology: true
 });
 
-const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () => {
 	console.log('Database connected');
@@ -30,10 +30,21 @@ const seedDB = async () => {
 			location: `${cities[random1000].city}, ${cities[random1000].state}`,
 			//creates random campground names
 			title: `${sample(descriptors)} ${sample(places)}`,
-			image: 'https://source.unsplash.com/collection/483251',
 			description:
 				'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat totam necessitatibus suscipit quam nobis laboriosam corporis nam! Voluptates quam quod fugiat esse dolorem delectus aliquid. Omnis assumenda asperiores incidunt nobis.',
-			price
+			price,
+			images: [
+				{
+					url:
+						'https://res.cloudinary.com/db6isivlv/image/upload/v1614099958/YelpCamp/wqpk5gcv7blxhpcyajlt.jpg',
+					filename: 'YelpCamp/wqpk5gcv7blxhpcyajlt'
+				},
+				{
+					url:
+						'https://res.cloudinary.com/db6isivlv/image/upload/v1614099957/YelpCamp/dzphnnyxkrknglltnrcl.jpg',
+					filename: 'YelpCamp/dzphnnyxkrknglltnrcl'
+				}
+			]
 		});
 		await camp.save();
 	}

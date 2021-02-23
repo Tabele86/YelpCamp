@@ -12,6 +12,11 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
 
+//requires our dotenv files in development mode
+if (process.env.NODE_ENV !== 'production') {
+	require('dotenv').config();
+}
+
 //router
 const userRoutes = require('./routes/users');
 const campgroundsRoutes = require('./routes/campgrounds');
