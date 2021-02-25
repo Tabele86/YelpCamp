@@ -13,7 +13,7 @@ const LocalStrategy = require('passport-local');
 const User = require('./models/user');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
-const MongoDBStore = require('connect-mongo')(session);
+const MongoStore = require('connect-mongo').default;
 
 //requires our dotenv files in development mode
 if (process.env.NODE_ENV !== 'production') {
@@ -59,8 +59,8 @@ app.use(
 
 const secret = process.env.SECRET || 'thisshouldbeabettersecret!';
 
-const store = new MongoDBStore({
-	url: dbUrl,
+const store = MongoStore.create({
+	mongoUrl: dbUrl,
 	secret,
 	touchAfter: 24 * 60 * 60
 });
