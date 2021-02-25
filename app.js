@@ -6,13 +6,14 @@ const ejsM = require('ejs-mate');
 const session = require('express-session');
 const flash = require('connect-flash');
 const ExpressError = require('./utils/ExpressError');
-const _db = 'yelp-camp'; //insertDBname
+const _db = 'yelp-camp'; //insertDBname for local
 const methodOverride = require('method-override');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
+const MongoDBStore = require('connect-mongo')(session);
 
 //requires our dotenv files in development mode
 if (process.env.NODE_ENV !== 'production') {
@@ -23,8 +24,13 @@ if (process.env.NODE_ENV !== 'production') {
 const userRoutes = require('./routes/users');
 const campgroundsRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
+
+//mongo atlas
+const dbUrl = process.env.DB_URL || `mongodb://localhost:27017/${_db}`;
+
 //db
-mongoose.connect(`mongodb://localhost:27017/${_db}`, {
+// mongoose.connect(`mongodb://localhost:27017/${_db}`, {
+mongoose.connect(dbUrl, {
 	useNewUrlParser: true,
 	useCreateIndex: true,
 	useUnifiedTopology: true,
@@ -45,12 +51,28 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(mongoSanitize());
+app.use(
+	mongoSanitize({
+		replaceWith: '_'
+	})
+);
 
+const secret = process.env.SECRET || 'thisshouldbeabettersecret!';
+
+const store = new MongoDBStore({
+	url: dbUrl,
+	secret,
+	touchAfter: 24 * 60 * 60
+});
+
+store.on('error', function(e) {
+	console.log('SESSION STORE ERROR', e);
+});
 //session cookies setup
 const sessionConfig = {
+	store,
 	name: 'session',
-	secret: 'thisshouldbeabettersecret!',
+	secret,
 	resave: false,
 	saveUninitialized: true,
 	cookie: {
@@ -125,11 +147,11 @@ app.use((req, res, next) => {
 	next();
 });
 
-app.get('/fakeUser', async (req, res) => {
-	const user = new User({ email: 'joe@gmail.com', username: 'joe' });
-	const newUser = await User.register(user, 'password123');
-	res.send(newUser);
-});
+// app.get('/fakeUser', async (req, res) => {
+// 	const user = new User({ email: 'joe@gmail.com', username: 'joe' });
+// 	const newUser = await User.register(user, 'password123');
+// 	res.send(newUser);
+// });
 
 app.use('/', userRoutes);
 app.use('/campgrounds', campgroundsRoutes);
@@ -153,6 +175,7 @@ app.use((err, req, res, next) => {
 	res.status(statusCode).render('error', { err });
 });
 
-app.listen(3000, () => {
-	console.log('APP IS LISTENING ON PORT 3000!');
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+	console.log(`APP IS LISTENING ON PORT ${port}`);
 });
