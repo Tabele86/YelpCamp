@@ -2,7 +2,7 @@
   "name": "yelpcamp",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -24,7 +24,7 @@
     "helmet": "^4.4.1",
     "joi": "^17.4.0",
     "method-override": "^3.0.0",
-    "mongoose": "^5.11.17",
+    "mongoose": "^5.12.9",
     "multer": "^1.4.2",
     "multer-storage-cloudinary": "^4.0.0",
     "passport": "^0.4.1",
